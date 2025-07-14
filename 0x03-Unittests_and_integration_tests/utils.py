@@ -29,4 +29,3 @@ def memoize(method):
         return getattr(self, attr_name)
 
     return wrapper
-
