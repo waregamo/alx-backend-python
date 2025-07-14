@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Integration test for GithubOrgClient"""
+"""Integration tests for GithubOrgClient"""
 
 import unittest
 from unittest.mock import patch, MagicMock
-from parameterized import parameterized_class
+from parameterized import parameterized, parameterized_class
 from client import GithubOrgClient
 from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
 
@@ -17,15 +17,15 @@ from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
     }
 ])
 class TestIntegrationGithubOrgClient(unittest.TestCase):
-    """Integration tests for GithubOrgClient"""
+    """Integration tests for GithubOrgClient.public_repos"""
 
     @classmethod
     def setUpClass(cls):
-        """Set up test fixtures by patching requests.get."""
+        """Patch requests.get and set side_effects"""
         cls.get_patcher = patch("requests.get")
-
         mock_get = cls.get_patcher.start()
-        # Side effect to return different JSONs depending on the call
+
+        # Simulate JSON responses from requests.get().json()
         mock_get.side_effect = [
             MagicMock(json=lambda: cls.org_payload),
             MagicMock(json=lambda: cls.repos_payload),
@@ -33,16 +33,16 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        """Stop the patcher after tests."""
+        """Stop the requests.get patcher"""
         cls.get_patcher.stop()
 
     def test_public_repos(self):
-        """Test public_repos returns expected repos."""
+        """Test public_repos returns expected repo list"""
         client = GithubOrgClient("google")
         self.assertEqual(client.public_repos(), self.expected_repos)
 
     def test_public_repos_with_license(self):
-        """Test public_repos returns only apache2 licensed repos."""
+        """Test public_repos filters repos by license"""
         client = GithubOrgClient("google")
         self.assertEqual(
             client.public_repos(license="apache-2.0"),
