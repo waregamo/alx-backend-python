@@ -1,19 +1,25 @@
+# chats/urls.py
+
 from django.urls import path, include
-from rest_framework import routers  # DefaultRouter
-from rest_framework_nested.routers import NestedDefaultRouter  # NestedDefaultRouter
-from .views import ConversationViewSet, MessageViewSet
+from rest_framework.routers import DefaultRouter
+from rest_framework_nested.routers import NestedDefaultRouter
 
-router = routers.DefaultRouter()
+from .views import ConversationViewSet, MessageViewSet, UserViewSet
 
-nested_router = NestedDefaultRouter(parent_router=None, parent_prefix='')
+# Main router
+router = DefaultRouter()
+router.register(r'users', UserViewSet, basename='user')
+router.register(r'conversations', ConversationViewSet, basename='conversation')
 
-# Register to one of them (either is fine for the checker)
-nested_router.register(r'conversations', ConversationViewSet, basename='conversation')
-nested_router.register(r'messages', MessageViewSet, basename='message')
+# Nested router for messages under conversations
+conversations_router = NestedDefaultRouter(router, r'conversations', lookup='conversation')
+conversations_router.register(r'messages', MessageViewSet, basename='conversation-messages')
 
 urlpatterns = [
-    path('', include(nested_router.urls)),
+    path('', include(router.urls)),
+    path('', include(conversations_router.urls)),
 ]
+
 
 
 
