@@ -2,7 +2,7 @@ from datetime import datetime
 from django.http import HttpResponseForbidden
 import os
 
-# ✅ 1. Logs every request
+# 1. Logs every request
 class RequestLoggingMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -17,7 +17,7 @@ class RequestLoggingMiddleware:
 
         return self.get_response(request)
 
-# ✅ 2. Restrict access based on time
+# 2. Restrict access based on time
 class RestrictAccessByTimeMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -28,7 +28,7 @@ class RestrictAccessByTimeMiddleware:
             return HttpResponseForbidden("Access to chat is only allowed between 6 PM and 9 PM.")
         return self.get_response(request)
 
-# ✅ 3. Check for offensive language
+# 3. Check for offensive language
 class OffensiveLanguageMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -42,7 +42,7 @@ class OffensiveLanguageMiddleware:
                     return HttpResponseForbidden("Offensive language is not allowed.")
         return self.get_response(request)
 
-# ✅ 4. Enforce role permissions
+# 4. Enforce role permissions
 class RolepermissionMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
