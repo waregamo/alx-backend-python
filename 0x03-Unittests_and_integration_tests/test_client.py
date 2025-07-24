@@ -99,6 +99,8 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         mock_get.side_effect = [
             unittest.mock.Mock(json=lambda: cls.org_payload),
             unittest.mock.Mock(json=lambda: cls.repos_payload),
+            unittest.mock.Mock(json=lambda: cls.org_payload),
+            unittest.mock.Mock(json=lambda: cls.repos_payload),
         ]
 
     @classmethod

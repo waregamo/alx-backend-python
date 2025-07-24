@@ -1,6 +1,5 @@
-
 #!/usr/bin/env python3
-"""A github org client
+"""A GitHub org client
 """
 from typing import (
     List,
@@ -15,7 +14,7 @@ from utils import (
 
 
 class GithubOrgClient:
-    """A Githib org client
+    """A GitHub org client
     """
     ORG_URL = "https://api.github.com/orgs/{org}"
 
@@ -25,7 +24,7 @@ class GithubOrgClient:
 
     @memoize
     def org(self) -> Dict:
-        """Memoize org"""
+        """Memoized org"""
         return get_json(self.ORG_URL.format(org=self._org_name))
 
     @property
@@ -35,7 +34,7 @@ class GithubOrgClient:
 
     @memoize
     def repos_payload(self) -> Dict:
-        """Memoize repos payload"""
+        """Memoized repos payload"""
         return get_json(self._public_repos_url)
 
     def public_repos(self, license: str = None) -> List[str]:
@@ -45,15 +44,12 @@ class GithubOrgClient:
             repo["name"] for repo in json_payload
             if license is None or self.has_license(repo, license)
         ]
-
         return public_repos
 
     @staticmethod
     def has_license(repo: Dict[str, Dict], license_key: str) -> bool:
-        """Static: has_license"""
+        """Checks if repo has given license"""
         assert license_key is not None, "license_key cannot be None"
-        try:
-            has_license = access_nested_map(repo, ("license", "key")) == license_key
-        except KeyError:
+        if not repo.get("license"):
             return False
-        return has_license
+        return access_nested_map(repo, ("license", "key")) == license_key
