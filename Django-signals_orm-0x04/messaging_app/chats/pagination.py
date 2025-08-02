@@ -1,8 +1,8 @@
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
-class StandardResultsSetPagination(PageNumberPagination):
-    page_size = 20
+class MessagePagination(PageNumberPagination):
+    page_size = 20  # Return 20 messages per page
     page_size_query_param = 'page_size'
     max_page_size = 100
 
