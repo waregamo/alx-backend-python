@@ -19,4 +19,8 @@ from django.urls import path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("inbox/", views.inbox, name="inbox"),
+    path("message/<int:message_id>/", views.view_thread, name="view_thread"),
+    path("send/", views.send_message, name="send_message"),
+    path("delete/", views.delete_user, name="delete_user"),
 ]
