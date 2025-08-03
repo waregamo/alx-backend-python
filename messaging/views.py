@@ -2,8 +2,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages as django_messages
-from .models import Message
 from django.contrib.auth import get_user_model, logout
+
+from .models import Message, MessageHistory
 
 User = get_user_model()
 
@@ -22,10 +23,12 @@ def inbox(request):
     )
     return render(request, 'messaging/inbox.html', {'messages': messages})
 
+
 @login_required
 def view_thread(request, message_id):
     """
-    Display a message thread (main message and its replies).
+    Display a message thread (main message and its replies),
+    including the message edit history.
     """
     root_message = get_object_or_404(
         Message.objects.select_related('sender', 'receiver'),
@@ -38,10 +41,20 @@ def view_thread(request, message_id):
         .select_related('sender', 'receiver')
         .order_by('timestamp')
     )
+
+    # Fetch the edit history for the root message
+    edit_history = (
+        MessageHistory.objects
+        .filter(message=root_message)
+        .order_by('-edited_at')
+    )
+
     return render(request, 'messaging/thread.html', {
         'message': root_message,
         'replies': replies,
+        'edit_history': edit_history,
     })
+
 
 @login_required
 @require_http_methods(["POST"])
@@ -68,6 +81,7 @@ def send_message(request):
         django_messages.error(request, "Receiver and content are required.")
 
     return redirect("inbox")
+
 
 @login_required
 @require_http_methods(["POST"])
