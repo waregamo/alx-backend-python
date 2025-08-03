@@ -1,99 +1,44 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_http_methods
-from django.contrib import messages as django_messages
-from django.contrib.auth import get_user_model, logout
-
-from .models import Message, MessageHistory
+from django.views.decorators.cache import cache_page
+from django.contrib.auth import get_user_model
+from .models import Message
 
 User = get_user_model()
 
 @login_required
 def inbox(request):
-    """
-    Display top-level messages (no parent) received by the logged-in user.
-    Includes sender and receiver info and prefetches replies.
-    """
-    messages = (
-        Message.objects
-        .filter(receiver=request.user, parent_message__isnull=True)
-        .select_related('sender', 'receiver')
-        .prefetch_related('replies')
-        .order_by('-timestamp')
-    )
-    return render(request, 'messaging/inbox.html', {'messages': messages})
-
+    unread_msgs = Message.unread.for_user(request.user)
+    return render(request, 'messaging/inbox.html', {'unread_messages': unread_msgs})
 
 @login_required
+@cache_page(60)
 def view_thread(request, message_id):
-    """
-    Display a message thread (main message and its replies),
-    including the message edit history.
-    """
-    root_message = get_object_or_404(
+    root = get_object_or_404(
         Message.objects.select_related('sender', 'receiver'),
-        id=message_id,
-        receiver=request.user
+        pk=message_id, receiver=request.user
     )
-    replies = (
-        Message.objects
-        .filter(parent_message=root_message)
-        .select_related('sender', 'receiver')
-        .order_by('timestamp')
-    )
-
-    # Fetch the edit history for the root message
-    edit_history = (
-        MessageHistory.objects
-        .filter(message=root_message)
-        .order_by('-edited_at')
-    )
-
+    replies = root.replies.select_related('sender', 'receiver').all().order_by('timestamp')
+    edit_history = root.edit_history.order_by('-edited_at')
     return render(request, 'messaging/thread.html', {
-        'message': root_message,
+        'message': root,
         'replies': replies,
-        'edit_history': edit_history,
+        'edit_history': edit_history
     })
 
-
 @login_required
-@require_http_methods(["POST"])
 def send_message(request):
-    """
-    Send a message from the logged-in user to a specified receiver.
-    """
-    receiver_id = request.POST.get("receiver_id")
-    content = request.POST.get("content")
-    parent_id = request.POST.get("parent_message_id")
-
-    if receiver_id and content:
-        receiver = get_object_or_404(User, id=receiver_id)
-        parent_message = Message.objects.filter(id=parent_id).first() if parent_id else None
-
-        Message.objects.create(
-            sender=request.user,
-            receiver=receiver,
-            content=content,
-            parent_message=parent_message
-        )
-        django_messages.success(request, "Message sent successfully.")
-    else:
-        django_messages.error(request, "Receiver and content are required.")
-
-    return redirect("inbox")
-
+    if request.method == 'POST':
+        recv = get_object_or_404(User, pk=request.POST.get('receiver_id'))
+        parent = Message.objects.filter(pk=request.POST.get('parent_message_id')).first()
+        Message.objects.create(sender=request.user, receiver=recv, content=request.POST.get('content'), parent_message=parent)
+        return redirect('inbox')
+    users = User.objects.exclude(pk=request.user.pk)
+    return render(request, 'messaging/send.html', {'users': users})
 
 @login_required
-@require_http_methods(["POST"])
 def delete_user(request):
-    """
-    Allows the currently logged-in user to delete their own account.
-    Related data is cleaned up using a post_delete signal.
-    """
-    if request.method == "POST":
-        user = request.user
-        username = user.username
-        logout(request)  # Logs out the user before deletion
-        user.delete()
-        django_messages.success(request, f"User '{username}' and all related data have been deleted.")
-        return redirect("home")
+    if request.method == 'POST':
+        request.user.delete()
+        return redirect('home')
+    return render(request, 'messaging/confirm_delete.html')

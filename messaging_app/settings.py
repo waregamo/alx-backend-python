@@ -102,6 +102,24 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],  # or add custom template dir if needed
+        'APP_DIRS': True,  # Must be True to use app templates
+        'OPTIONS': {
+            'context_processors': [
+                ...
+            ],
+        },
+    },
+]
+
+
+
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
