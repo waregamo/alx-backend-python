@@ -12,9 +12,7 @@ django.setup()
 from django.contrib.auth.models import User
 from messaging.models import Message, MessageHistory
 
-# -----------------------------------------------------------------
-# SERVICE FUNCTION: The single, correct way to edit a message
-# -----------------------------------------------------------------
+
 def edit_message(editor: User, message: Message, new_content: str) -> Message:
     """
     Edits a message's content and ensures the editor is recorded.
@@ -35,9 +33,7 @@ def edit_message(editor: User, message: Message, new_content: str) -> Message:
     print(f"--- SERVICE: Message {message.id} saved successfully.")
     return message
 
-# -----------------------------------------------------------------
-# DEMONSTRATION SCRIPT
-# -----------------------------------------------------------------
+
 def run():
     """Demonstrates the robust message editing workflow."""
     print("Step 1: Preparing users...")
@@ -53,13 +49,12 @@ def run():
     )
     print(f"Message (ID: {msg.id}) created.\n")
 
-    print("Step 3: Alice edits her message using the robust service function...")
-    # This is the correct way: call the dedicated function.
-    # We pass the user performing the action and the new content.
+    print("Step 3: otieno edits her message using the robust service function...")
+    
     edit_message(
         editor=user1,
         message=msg,
-        new_content="Project Alpha is slightly behind schedule. Need to discuss."
+        new_content="Project kennedy is slightly behind schedule. Need to discuss."
     )
     print("Message edit process complete.\n")
 
