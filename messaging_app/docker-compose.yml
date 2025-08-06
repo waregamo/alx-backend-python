@@ -6,7 +6,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: 3xplore@
-      MYSQL_DATABASE: messaging_app
+      MYSQL_DB: messaging_app
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     volumes:
@@ -16,7 +16,7 @@ services:
 
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python3 manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
