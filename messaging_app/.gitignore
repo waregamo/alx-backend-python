@@ -27,3 +27,4 @@ media/
 # Others
 *.DS_Store
 *.bak
+.env
