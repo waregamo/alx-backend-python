@@ -17,6 +17,7 @@ spec:
       containers:
       - name: django-messaging-app
         image: messaging_app:latest
+        imagePullPolicy: Never          # <--- Added this line
         ports:
         - containerPort: 8000
         env:
@@ -37,3 +38,4 @@ spec:
       port: 8000
       targetPort: 8000
   type: ClusterIP
+
