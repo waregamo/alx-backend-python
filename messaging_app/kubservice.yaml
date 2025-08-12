@@ -4,7 +4,7 @@ metadata:
   name: django-messaging-service
 spec:
   selector:
-    app: django-messaging-app-green    # change to "django-messaging-app-blue" to switch back
+    app: django-messaging-app-blue   
   ports:
     - protocol: TCP
       port: 8000
