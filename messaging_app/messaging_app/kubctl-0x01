@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# kubctl-0x01 - Scale Django app in Kubernetes and test performance
+
+DEPLOYMENT_NAME="django-messaging-app"
+
+echo "Scaling $DEPLOYMENT_NAME to 3 replicas..."
+kubectl scale deployment "$DEPLOYMENT_NAME" --replicas=3
+
+echo "Waiting for pods to be ready..."
+kubectl wait --for=condition=Ready pod -l app=$DEPLOYMENT_NAME --timeout=120s
+
+echo "Verifying running pods..."
+kubectl get pods -l app=$DEPLOYMENT_NAME
+
+echo "Starting load test with wrk (10s test)..."
+# Adjust service name and port as per your ClusterIP or NodePort setup
+wrk -t4 -c100 -d10s http://django-messaging-service:8000/ || echo "wrk test failed - ensure wrk is installed and service is accessible"
+
+echo "Monitoring resource usage..."
+kubectl top pods || echo "kubectl top failed - ensure metrics-server is installed"
