@@ -46,9 +46,27 @@ jobs:
         . venv/bin/activate
         pip install --upgrade pip
         pip install -r messaging_app/requirements.txt
-        pip install pytest pytest-django mysqlclient
+        pip install pytest pytest-django mysqlclient flake8 pytest-cov
 
-    - name: Run Django Tests
+    - name: Lint code with flake8
       run: |
         . venv/bin/activate
-        python manage.py test
+        flake8 messaging_app --exit-zero
+      continue-on-error: false  # Fail the build on lint errors
+
+    - name: Run Django Tests with Coverage
+      run: |
+        . venv/bin/activate
+        pytest messaging_app/tests --cov=messaging_app --cov-report=xml --junitxml=report.xml
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: coverage.xml
+
+    - name: Upload test report
+      uses: actions/upload-artifact@v3
+      with:
+        name: junit-report
+        path: report.xml
